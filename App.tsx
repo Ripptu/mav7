@@ -12,30 +12,83 @@ const SectionTitle = ({ title, subtitle }: { title: string, subtitle: string }) 
 );
 
 // --- LOGO COMPONENT ---
-// Uses the provided PNG. Accepts a theme prop to adjust color.
 interface MAV7LogoProps {
   className?: string;
   theme?: 'light' | 'dark';
 }
 
 const MAV7Logo: React.FC<MAV7LogoProps> = ({ className, theme = 'dark' }) => {
-  // Source image is black. 
-  // theme='dark' implies dark background -> white logo (invert).
-  // theme='light' implies light background -> black logo (no invert).
   const isDarkTheme = theme === 'dark';
-
   return (
     <div className={`relative ${className}`}>
+      {/* 
+         Using the JPG logo provided. 
+         If the logo has a white background, 'mix-blend-multiply' or 'screen' might be needed depending on context.
+         For a dark theme (black background), if the logo is black-on-white, inverting it makes it white-on-black.
+      */}
       <img 
-        src="https://i.postimg.cc/1RbQC5D5/mav.png" 
+        src="https://i.postimg.cc/RCDc2wD0/mav7.jpg" 
         alt="MAV7" 
         className="w-full h-auto object-contain transition-all duration-500"
         style={{ 
-            filter: isDarkTheme ? 'invert(1) brightness(100)' : 'none'
+            // Assuming the JPG is black text on white background.
+            // Invert to make it white text on black background for the dark theme.
+            filter: isDarkTheme ? 'invert(1)' : 'none',
+            mixBlendMode: isDarkTheme ? 'screen' : 'multiply'
         }}
       />
     </div>
   );
+};
+
+// --- ANIMATED SVG LOGO FOR HERO ---
+const AnimatedLogo = () => {
+    const pathVariants = {
+        hidden: { pathLength: 0, opacity: 0 },
+        visible: { 
+            pathLength: 1, 
+            opacity: 1,
+            transition: { duration: 2, ease: "easeInOut" }
+        }
+    };
+
+    const fillVariants = {
+        hidden: { fillOpacity: 0 },
+        visible: { 
+            fillOpacity: 1, 
+            transition: { delay: 2, duration: 1 }
+        }
+    };
+
+    return (
+        <motion.svg
+            width="300"
+            height="100"
+            viewBox="0 0 300 100"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+            initial="hidden"
+            animate="visible"
+            className="w-full max-w-[600px] h-auto"
+        >
+            {/* REPLACE THIS PATH WITH YOUR LOGO PATH */}
+            {/* Example Placeholder Path: M A V 7 */}
+            <motion.path
+                d="M10 90V10L50 60L90 10V90 M110 90L150 10L190 90 M125 60H175 M210 10L250 90L290 10 M310 10H390L340 90"
+                stroke="#F2F2F2"
+                strokeWidth="4"
+                strokeLinecap="square"
+                variants={pathVariants}
+            />
+             {/* Optional Fill Layer */}
+            <motion.path
+                d="M10 90V10L50 60L90 10V90 M110 90L150 10L190 90 M125 60H175 M210 10L250 90L290 10 M310 10H390L340 90"
+                fill="#F2F2F2"
+                variants={fillVariants}
+                className="opacity-50" // Subtle fill
+            />
+        </motion.svg>
+    );
 };
 
 // --- SECTIONS ---
@@ -46,21 +99,16 @@ const IntroSection = () => {
       <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.03)_1px,transparent_1px)] bg-[size:100px_100px] pointer-events-none" />
       
       <div className="w-full max-w-4xl px-8 z-10 flex flex-col items-center">
-        {/* Main Logo Reveal */}
-        <motion.div
-            initial={{ opacity: 0, scale: 0.95, filter: "blur(10px)" }}
-            animate={{ opacity: 1, scale: 1, filter: "blur(0px)" }}
-            transition={{ duration: 1.5, ease: "easeOut" }}
-            className="w-full max-w-2xl"
-        >
-            <MAV7Logo theme="dark" />
-        </motion.div>
+        {/* Animated SVG Logo Reveal */}
+        <div className="w-full max-w-2xl mb-12 flex justify-center">
+             <AnimatedLogo />
+        </div>
         
         <motion.div 
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 1, duration: 1 }}
-          className="mt-16 text-center"
+          transition={{ delay: 3, duration: 1 }}
+          className="mt-8 text-center"
         >
           <div className="inline-block border border-brand-white/20 px-4 py-2 bg-brand-black/50 backdrop-blur-sm">
              <p className="font-mono text-sm tracking-[0.3em] text-brand-white/80">
@@ -184,9 +232,7 @@ const GallerySection = () => {
                 <motion.div style={{ x }} className="flex gap-12 pl-[10vw] md:pl-[30vw] items-center">
                     {images.map((img, index) => (
                         <div key={index} className="relative w-[80vw] md:w-[45vw] h-[60vh] shrink-0 group">
-                            <div className="absolute -top-12 left-0 text-xs font-mono text-brand-white/40 tracking-widest">
-                                IMG_{img.id} // RAW_RENDER
-                            </div>
+                            {/* Removed top label as requested */}
                             <div className="w-full h-full overflow-hidden border border-brand-white/10 bg-[#111]">
                                 <img 
                                     src={img.src} 
@@ -195,12 +241,7 @@ const GallerySection = () => {
                                 />
                             </div>
                             
-                            {/* Hover Overlay Title */}
-                            <div className="absolute bottom-0 left-0 p-8 opacity-0 group-hover:opacity-100 transition-opacity duration-500 translate-y-4 group-hover:translate-y-0 pointer-events-none">
-                                 <h3 className="text-3xl md:text-5xl font-bold text-brand-white uppercase tracking-tighter shadow-black drop-shadow-lg">
-                                    {img.title}
-                                 </h3>
-                            </div>
+                            {/* Removed bottom text overlay (Bildunterschriften) as requested */}
                         </div>
                     ))}
                     {/* Spacer */}
@@ -248,7 +289,7 @@ const BlueprintSection = () => {
                className="w-full h-auto object-contain max-h-[60vh] opacity-90 transition-opacity duration-700 hover:opacity-100"
              />
              
-             <div className="absolute bottom-4 right-8 font-mono text-xs text-brand-white/30">REF: VECTOR_001</div>
+             {/* Removed Technical Label "REF: VECTOR_001" as requested */}
          </div>
 
          <motion.p 
